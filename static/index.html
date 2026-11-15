@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Facies Classifier · Lithofacies from well logs</title>
+  <meta name="description" content="Upload the wireline logs of one well and a neural network predicts nine lithofacies at every depth sample. Interactive log display, scores and a public API.">
+  <meta name="author" content="Boualem Pereira">
+  <meta name="theme-color" content="#efe5cf">
+  <meta property="og:title" content="Facies Classifier · Lithofacies from well logs">
+  <meta property="og:description" content="A neural network that predicts nine lithofacies from wireline logs, with an interactive log display.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top">
+    <div class="wrap top-row">
+      <a class="mark" href="/" aria-label="Facies Classifier, home">
+        <span class="mark-strip" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="mark-text">Facies<br>Classifier</span>
+        <span class="beta">Beta</span>
+      </a>
+      <nav aria-label="Main">
+        <a href="#about">About the model</a>
+        <a href="https://github.com/BoualemP/well-log-facies-classification" rel="noopener">Notebook</a>
+        <a href="https://github.com/BoualemP/facies-classifier-app" rel="noopener">Source</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="wrap intro">
+      <div class="intro-text">
+        <p class="eyebrow">Well-log lab · beta version</p>
+        <h1>Lithofacies from wireline logs, sample by sample.</h1>
+        <p class="lead">Load one well and a neural network classifies nine facies at every depth sample from five logs. It was trained on five wells and tested on two wells it never saw.</p>
+        <p class="example-link"><button type="button" class="link-button" id="example-link">See an example result ↓</button></p>
+        <dl class="spec">
+          <div><dt>Inputs</dt><dd>GR · ILD_log10 · DeltaPHI · PHIND · PE · NM_M · RELPOS</dd></div>
+          <div><dt>Output</dt><dd>Facies and probability for each sample</dd></div>
+          <div><dt>Model</dt><dd>Neural network, ONNX, 15.5 kB</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel input-panel" id="load" aria-labelledby="input-title">
+        <h2 id="input-title" class="panel-title"><span class="num">No. 01</span> Load your well</h2>
+
+        <label class="drop" id="drop">
+          <input type="file" id="file" accept=".csv,text/csv">
+          <span class="drop-icon" aria-hidden="true">⇩</span>
+          <span class="drop-main">Drop the CSV file of your well here</span>
+          <span class="drop-sub">or <u>browse your computer</u> · one well per file · up to 5 MB</span>
+        </label>
+        <p class="hint small">Required columns: <code>Depth</code>, <code>GR</code>, <code>ILD_log10</code>, <code>DeltaPHI</code>, <code>PHIND</code>, <code>PE</code>, <code>NM_M</code>, <code>RELPOS</code>. Column names are not case-sensitive. Add <code>Facies</code> to score the prediction. <a href="/api/demo/synthetic_a/csv" download>Download an example file</a>.</p>
+        <p class="hint small model-note">The model was trained on five wells of the SEG 2016 machine learning contest dataset: it works with any well that has these logs, and is most reliable in rocks similar to those wells. <a href="#about">How was it trained, and what are its limits? →</a></p>
+        <div class="message" id="message" role="status" aria-live="polite"></div>
+
+        <div class="or"><span>no file at hand?</span></div>
+        <p class="hint">Try one of two example wells. They are synthetic, simulated from the statistics of the training wells, and come with the facies used to simulate them:</p>
+        <div class="demo-buttons" id="demo-buttons">
+          <button type="button" class="btn" data-well="synthetic_a" data-title="Example well 1 (synthetic)">Example well 1</button>
+          <button type="button" class="btn" data-well="synthetic_b" data-title="Example well 2 (synthetic)">Example well 2</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap results" id="results" hidden aria-labelledby="results-title">
+      <div class="results-head">
+        <div>
+          <h2 id="results-title" class="panel-title" tabindex="-1"><span class="num">No. 02</span> <span id="well-title">Result</span></h2>
+          <p class="meta" id="well-meta"></p>
+          <p class="demo-note" id="demo-note" hidden>This is a synthetic example well. Load your own well above to classify it.</p>
+        </div>
+        <div class="head-actions">
+          <a class="btn btn-ghost" href="#load">Load your own well ↑</a>
+          <button type="button" class="btn btn-ghost" id="download">Download predictions (CSV)</button>
+        </div>
+      </div>
+
+      <div class="metrics" id="metrics"></div>
+
+      <div class="log-layout">
+        <figure class="panel log-panel">
+          <figcaption class="sr-only">Log display: curves, predicted and true facies and confidence against depth. Use the arrow keys to move the depth cursor.</figcaption>
+          <p class="scroll-hint">Scroll the display sideways to see the facies columns →</p>
+          <div class="log-scroll">
+            <svg id="logplot" tabindex="0" role="img" aria-label="Log display"></svg>
+          </div>
+        </figure>
+
+        <aside class="panel readout" aria-labelledby="readout-title">
+          <h3 id="readout-title" class="readout-title">Readout</h3>
+          <p class="readout-depth"><span id="r-depth">—</span> <small>ft</small></p>
+          <table class="readout-logs" id="r-logs"></table>
+          <div class="readout-facies" id="r-facies"></div>
+          <h4 class="readout-sub">Probabilities</h4>
+          <div class="bars" id="r-proba"></div>
+          <p class="hint small readout-help">Move over the display, or focus it and use ↑ ↓ (Shift for 10 samples).</p>
+        </aside>
+      </div>
+
+      <div class="panel composition">
+        <h3 class="panel-subtitle">Facies composition</h3>
+        <div id="composition"></div>
+      </div>
+    </section>
+
+    <section class="wrap about" id="about" hidden aria-labelledby="about-title">
+      <h2 id="about-title" class="section-title" tabindex="-1">About the model</h2>
+
+      <div class="about-grid">
+        <article class="panel about-card">
+          <h3><span class="num">i.</span> Training data</h3>
+          <p>Five wells of the SEG 2016 machine learning contest dataset (2,252 depth samples) were used for training. Two more wells, NEWBY and SHANKLE (912 samples), were kept apart for the final test. Wells without a PE log, and one set of samples from a single facies, were left out. The contest data is not openly licensed, so it is not redistributed here: the example wells are synthetic.</p>
+        </article>
+        <article class="panel about-card">
+          <h3><span class="num">ii.</span> Inputs and features</h3>
+          <p>Seven inputs per sample: GR, ILD_log10, DeltaPHI, PHIND, PE, NM_M (non-marine / marine indicator) and RELPOS (relative position in the formation). Extreme values are capped at the training limits, and each log adds its gradient and a 5-sample moving average: 17 features.</p>
+        </article>
+        <article class="panel about-card">
+          <h3><span class="num">iii.</span> Neural network</h3>
+          <p>Two hidden layers (64 and 32 units, dropout 0.3), trained in Keras and exported to ONNX (15.5 kB). The server runs it with ONNX Runtime, without TensorFlow. The output is a probability for each of the nine facies.</p>
+        </article>
+      </div>
+
+      <h3 class="about-sub">Results on the two test wells</h3>
+      <table class="results-table">
+        <thead><tr><th>Model</th><th>Macro F1</th><th>Accuracy</th></tr></thead>
+        <tbody>
+          <tr><td>Majority class (benchmark)</td><td>0.038</td><td>0.205</td></tr>
+          <tr><td>Logistic regression</td><td>0.399</td><td>0.509</td></tr>
+          <tr><td>Gradient boosting</td><td>0.396</td><td>0.493</td></tr>
+          <tr class="chosen"><td>Neural network (this application)</td><td>0.446</td><td>0.476</td></tr>
+        </tbody>
+      </table>
+      <p class="hint">In cross-validation over the training wells the three trained models scored alike (macro F1 0.31 to 0.34); the network was chosen because it runs as a small ONNX file. Full analysis in the <a href="https://github.com/BoualemP/well-log-facies-classification" rel="noopener">notebook</a>.</p>
+
+      <div class="legend" id="legend" aria-label="Facies codes"></div>
+
+      <div class="about-two">
+        <div class="panel about-card">
+          <h3>Current limitations</h3>
+          <ul>
+            <li>Trained on five wells of a single dataset: most reliable in rocks and logs similar to those wells.</li>
+            <li>Needs NM_M and RELPOS, two interpretations specific to this dataset that most wells do not have.</li>
+            <li>Knows only these nine facies. Rare facies are poorly recognised (on the test wells, 16 % of SS and 6 % of MS samples).</li>
+            <li>About half of the test samples are misclassified, mostly as a neighbouring facies.</li>
+            <li>Accepts CSV files only, with the column names above (a few aliases such as DEPT or PEF are recognised).</li>
+          </ul>
+        </div>
+        <div class="panel about-card">
+          <h3>What's next</h3>
+          <ul>
+            <li><strong>More training data:</strong> more wells, and wells from other basins, to make the model less dependent on one field.</li>
+            <li><strong>A model for standard logs:</strong> a version that needs neither NM_M nor RELPOS, and copes with a missing log such as PE.</li>
+            <li><strong>Better use of depth:</strong> models that read the log sequence along depth, and weighting of rare facies.</li>
+            <li><strong>Easier input:</strong> a column-matching step for any column names, and LAS files, the standard well-log format.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap api" id="api" hidden aria-labelledby="api-title">
+      <h2 id="api-title" class="section-title" tabindex="-1">API</h2>
+      <p>The page runs on a public JSON API, which other programs can call directly. Interactive documentation: <a href="/docs">/docs</a>.</p>
+      <pre><code>curl -F "file=@my_well.csv" <span id="api-base">https://…</span>/api/predict</code></pre>
+      <table class="endpoints">
+        <tr><td><code>POST /api/predict</code></td><td>Facies, confidence and probabilities for an uploaded CSV</td></tr>
+        <tr><td><code>GET /api/demo/{well}</code></td><td>Prediction for a synthetic example well (synthetic_a, synthetic_b)</td></tr>
+        <tr><td><code>GET /api/demo/{well}/csv</code></td><td>The example file, showing the expected format</td></tr>
+        <tr><td><code>GET /api/health</code></td><td>Service status</td></tr>
+      </table>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-row">
+      <p>© 2026 <a href="https://boualemp.github.io" rel="noopener">Boualem Pereira</a> · <a href="#api">API</a> · Code under the <a href="https://github.com/BoualemP/facies-classifier-app/blob/main/LICENSE" rel="noopener">MIT licence</a></p>
+      <p class="small">Beta version: predictions are indicative and the application is still being improved. Model trained on the SEG 2016 machine learning contest dataset, which is not redistributed here.</p>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

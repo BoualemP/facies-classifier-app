@@ -1,0 +1,107 @@
+{
+  "logs": [
+    "GR",
+    "ILD_log10",
+    "DeltaPHI",
+    "PHIND",
+    "PE"
+  ],
+  "other_inputs": [
+    "NM_M",
+    "RELPOS"
+  ],
+  "features": [
+    "GR",
+    "ILD_log10",
+    "DeltaPHI",
+    "PHIND",
+    "PE",
+    "NM_M",
+    "RELPOS",
+    "GR_grad",
+    "GR_mean",
+    "ILD_log10_grad",
+    "ILD_log10_mean",
+    "DeltaPHI_grad",
+    "DeltaPHI_mean",
+    "PHIND_grad",
+    "PHIND_mean",
+    "PE_grad",
+    "PE_mean"
+  ],
+  "context_window": 5,
+  "cap_low": {
+    "GR": 14.463,
+    "ILD_log10": -0.0014,
+    "DeltaPHI": -16.3824,
+    "PHIND": 2.9281,
+    "PE": 1.6474
+  },
+  "cap_high": {
+    "GR": 218.7056,
+    "ILD_log10": 1.2671,
+    "DeltaPHI": 16.149,
+    "PHIND": 47.4586,
+    "PE": 6.3067
+  },
+  "feature_mean": {
+    "GR": 67.82661855239787,
+    "ILD_log10": 0.6402350293066963,
+    "DeltaPHI": 3.8871945559502663,
+    "PHIND": 13.355895639431616,
+    "PE": 3.7613605506216694,
+    "NM_M": 1.4906749555950267,
+    "RELPOS": 0.5242708703374779,
+    "GR_grad": -0.09926776198934276,
+    "GR_mean": 67.82645174511545,
+    "ILD_log10_grad": 0.00027760079973357003,
+    "ILD_log10_mean": 0.6402389048763972,
+    "DeltaPHI_grad": -0.010751332149200704,
+    "DeltaPHI_mean": 3.889556204854944,
+    "PHIND_grad": -0.01206660746003552,
+    "PHIND_mean": 13.358012690941385,
+    "PE_grad": 0.0009813499111900536,
+    "PE_mean": 3.760929208111308
+  },
+  "feature_std": {
+    "GR": 29.400680912404948,
+    "ILD_log10": 0.24919415592375435,
+    "DeltaPHI": 5.056359234907648,
+    "PHIND": 7.354853673550395,
+    "PE": 0.8859281219964691,
+    "NM_M": 0.4999130359841052,
+    "RELPOS": 0.28920007791528207,
+    "GR_grad": 11.18560042801846,
+    "GR_mean": 26.75638787985689,
+    "ILD_log10_grad": 0.03609147668266608,
+    "ILD_log10_mean": 0.2448960398303388,
+    "DeltaPHI_grad": 2.4709162530571263,
+    "DeltaPHI_mean": 4.472199129046156,
+    "PHIND_grad": 2.9518762301226036,
+    "PHIND_mean": 6.61736191741378,
+    "PE_grad": 0.30385572288212326,
+    "PE_mean": 0.8257510674863695
+  },
+  "facies": {
+    "1": "SS",
+    "2": "CSiS",
+    "3": "FSiS",
+    "4": "SiSh",
+    "5": "MS",
+    "6": "WS",
+    "7": "D",
+    "8": "PS",
+    "9": "BS"
+  },
+  "facies_colors": [
+    "#F4D03F",
+    "#F5B041",
+    "#DC7633",
+    "#6E2C00",
+    "#1B4F72",
+    "#2E86C1",
+    "#AED6F1",
+    "#A569BD",
+    "#196F3D"
+  ]
+}
