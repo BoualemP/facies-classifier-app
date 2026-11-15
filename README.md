@@ -2,6 +2,8 @@
 
 > **Status: beta.** The application works end to end, but predictions are indicative and the interface and API may still change.
 
+**Live demo:** [facies-classifier-app.onrender.com](https://facies-classifier-app.onrender.com) (free hosting: the first load after a quiet period can take about a minute).
+
 Web application that predicts nine lithofacies from the wireline logs of one well. A FastAPI service runs a neural network exported to ONNX, and the page shows the result as an interactive log display, with the confidence and probabilities of every depth sample and, when the true facies are given, the accuracy and macro F1.
 
 The model comes from [Well-Log Facies Classification with a Neural Network](https://github.com/BoualemP/well-log-facies-classification), trained on the SEG 2016 machine learning contest dataset.
